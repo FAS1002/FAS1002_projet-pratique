@@ -1,41 +1,105 @@
 ---
 title: "Titre de votre page d'importation"
-title-block-banner: true
+title-block-banner: false
 description: | 
   Petite description de cette page.
 # à changer
 date: "2022-12-21"
 # Modifier les détails que vous voulez
-author:
-  - name: "Prénom Nom"
-    # Votre site web perso ou github
-    url: https://github.com/VOTREUSERNAME
-    # les champs d'affiliation sont optionnels, vous pouvez les
-    # comment out en ajoutant un # devant.
-    affiliation: FAS1002
-    affiliation-url: https://FAS1002.github.io/A22
-    # changer pour votre propre orcid id
-    # https://orcid.org/ pour vous inscrire.
-    orcid: 0000-0000-0000-0000
+# author:
+#   - name: "Prénom Nom"
+#     # Votre site web perso ou github
+#     url: https://github.com/VOTREUSERNAME
+#     # les champs d'affiliation sont optionnels, vous pouvez les
+#     # comment out en ajoutant un # devant.
+#     affiliation: FAS1002
+#     affiliation-url: https://FAS1002.github.io/A22
+#     # changer pour votre propre orcid id
+#     # https://orcid.org/ pour vous inscrire.
+#     orcid: 0000-0000-0000-0000
 
 # TRUE == Générer une citation pour cette page précise. Pour enlever, mettre false.
-citation: true
+citation: false
 # Inclure les références que vous utilisez dans vos rapports. Je conseille Zotero pour construire
 # ce fichier ou de connecter RStudio directement pour pouvoir citer avec @nom-de-reference.
 bibliography: references.bib
 ---
 
-Il est maintenant le temps de décrire votre projet avant de passer au document
-suivant, soit l'importation et la manipulation des données.
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+library(fs)
+library(lubridate)
+library(tidyverse)
+library(skimr)
+```
 
-Je vous conseille d'écrire cette partie en dernier, une fois que vous aurez
-déjà vos résultats et figures afin d'éviter de réécrire cette page plusieurs
-fois.
-
-::: callout-important
-N'oubliez pas d'inclure vos références sur chacune des pages!
+::: callout-note
+Les données utilisées dans ce projet proviennent de
+[Kaggle](https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results)
+sous licence [CC0: Public
+Domain](https://creativecommons.org/publicdomain/zero/1.0/), c'est-à-dire que
+les données appartiennent au domaine public. Merci à rgriffin d'avoir rendu le
+tout public. Afin d'éviter à tout le monde de créer un compte sur Kaggle, les
+données peuvent être téléchargées à partir du répertoire du cours:
+<https://github.com/FAS1002/A22/blob/main/assets/fichiers/olympic_archive.zip>
 :::
 
-Par exemple:
+## Téléchargement du fichier
 
-> Les données proviennent entre autres de @owidenergy.
+Pour télécharger le dossier compressé (.zip), il faut le lien direct et il est
+possible de l'obtenir en copiant le lien du bouton "Download".
+
+```{r download}
+
+URL <- "https://github.com/FAS1002/A22/raw/main/assets/fichiers/olympic_archive.zip"
+
+base_path <- path("data", "raw")
+
+fname <- paste(today(),
+               "olympic-archive.zip", 
+               sep = "_")
+fpath <- path(base_path,
+              fname)
+
+download.file(url = URL, 
+              destfile = fpath)
+```
+
+V1: Le fichier a été téléchargé là: `data/raw/2022-11-29_olympic-archive.zip.`
+
+V2: V1: Le fichier a été téléchargé là: **`r fpath`**
+
+```{r extraction}
+
+unzip(zipfile = fpath,
+      exdir = base_path)
+
+
+
+```
+
+Nous voyons donc qu'il y a deux nouveaux fichiers:
+**`r fs::dir_ls(base_path)`.**
+
+```{r read}
+
+df <- read_csv(file = path(base_path, "athlete_events.csv"))
+skim(df)
+```
+
+| Variables | Description                              |
+|-----------|------------------------------------------|
+| ID        | Unique number for each athlete           |
+| Name      | Athlete's name                           |
+| Sex       | M or F                                   |
+| Age       | Integer                                  |
+| Height    | In centimeters                           |
+| Weight    | In kilograms                             |
+| Team      | Team name                                |
+| NOC       | National Olympic Committee 3-letter code |
+| NOC       | Year and season                          |
+| Year      | Integer                                  |
+| Season    | Summer or Winter                         |
+| City      | Host city                                |
+| Sport     | Sport                                    |
+| Event     | Event                                    |
+| Medal     | Gold, Silver, Bronze, or NA              |
